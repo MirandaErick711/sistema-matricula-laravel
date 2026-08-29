@@ -6,7 +6,7 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\CursoController;
 
 Route::inertia('/', 'welcome')->name('home');
-
+//comentario
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
@@ -25,4 +25,4 @@ Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
 Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.crear');
 Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.guardar');
 
-require __DIR__.'/settings.php';
+require __DIR__.'/settings.php'; 
