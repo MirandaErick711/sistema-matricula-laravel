@@ -21,8 +21,13 @@ Route::get('/personas', [PersonaController::class, 'create'])->name('personas.in
 Route::get('/personas/crear', [PersonaController::class, 'create'])->name('personas.crear');
 Route::post('/personas', [PersonaController::class, 'store'])->name('personas.guardar');
 
-Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+/*Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
 Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.crear');
 Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.guardar');
+*/
+
+//EDDY: CURSOS Y PRE-REQUISITO
+
+Route::resource('cursos', CursoController::class);
 
 require __DIR__.'/settings.php'; 
