@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Carrera extends Model
 {
@@ -12,16 +10,18 @@ class Carrera extends Model
         'nombre',
     ];
 
-    public function estudiantes(): HasMany
+    public function estudiantes()
     {
         return $this->hasMany(Estudiante::class);
     }
 
-    public function cursos(): BelongsToMany
+    public function cursos()
     {
         return $this->belongsToMany(
             Curso::class,
-            'carrera_curso'
+            'carrera_curso',
+            'carrera_id',
+            'curso_id'
         );
     }
 }

@@ -3,82 +3,135 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
-use App\Models\Docente;
-use App\Models\Aula;
+use App\Models\Carrera;
 use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
     public function index()
     {
-        $cursos = Curso::with(['docente', 'aula'])->paginate(10);
+        $cursos = Curso::with([
+            'carreras',
+            'prerrequisitos',
+            'grupos'
+        ])->paginate(10);
+
         return view('cursos.index', compact('cursos'));
     }
 
     public function create()
     {
-        $docentes = Docente::all();
-        $aulas = Aula::all();
+        $carreras = Carrera::all();
+
         $cursos = Curso::all();
-        return view('cursos.create', compact('docentes', 'aulas', 'cursos'));
+
+        return view('cursos.create', compact(
+            'carreras',
+            'cursos'
+        ));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|string|max:150',
             'creditos' => 'required|integer|min:1',
-            'docente_id' => 'required|exists:docentes,id',
-            'aula_id' => 'required|exists:aulas,id',
+            'carreras' => 'nullable|array',
+            'carreras.*' => 'exists:carreras,id',
             'prerrequisitos' => 'nullable|array',
             'prerrequisitos.*' => 'exists:cursos,id',
         ]);
 
-        $curso = Curso::create($request->only(['nombre', 'creditos', 'docente_id', 'aula_id']));
+        $curso = Curso::create([
+            'nombre' => $validated['nombre'],
+            'creditos' => $validated['creditos'],
+        ]);
 
-        if ($request->filled('prerrequisitos')) {
-            $curso->prerrequisitos()->sync($request->prerrequisitos);
-        }
+        $curso->carreras()->sync(
+            $validated['carreras'] ?? []
+        );
 
-        return redirect()->route('cursos.index')->with('success', 'Curso creado correctamente.');
+        $curso->prerrequisitos()->sync(
+            $validated['prerrequisitos'] ?? []
+        );
+
+        return redirect()
+            ->route('cursos.index')
+            ->with('success', 'Curso creado correctamente.');
     }
 
     public function show(Curso $curso)
     {
-        $curso->load(['docente', 'aula', 'prerrequisitos']);
+        $curso->load([
+            'carreras',
+            'prerrequisitos',
+            'esPrerrequisitoDe',
+            'grupos.docente',
+            'grupos.aula',
+            'grupos.semestre',
+            'grupos.horarios',
+        ]);
+
         return view('cursos.show', compact('curso'));
     }
 
     public function edit(Curso $curso)
     {
-        $docentes = Docente::all();
-        $aulas = Aula::all();
-        $cursos = Curso::where('id', '!=', $curso->id)->get();
-        $curso->load('prerrequisitos');
-        return view('cursos.edit', compact('curso', 'docentes', 'aulas', 'cursos'));
+        $carreras = Carrera::all();
+
+        $cursos = Curso::where(
+            'id',
+            '!=',
+            $curso->id
+        )->get();
+
+        $curso->load([
+            'carreras',
+            'prerrequisitos'
+        ]);
+
+        return view('cursos.edit', compact(
+            'curso',
+            'carreras',
+            'cursos'
+        ));
     }
 
     public function update(Request $request, Curso $curso)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|string|max:150',
             'creditos' => 'required|integer|min:1',
-            'docente_id' => 'required|exists:docentes,id',
-            'aula_id' => 'required|exists:aulas,id',
+            'carreras' => 'nullable|array',
+            'carreras.*' => 'exists:carreras,id',
             'prerrequisitos' => 'nullable|array',
             'prerrequisitos.*' => 'exists:cursos,id',
         ]);
 
-        $curso->update($request->only(['nombre', 'creditos', 'docente_id', 'aula_id']));
-        $curso->prerrequisitos()->sync($request->prerrequisitos ?? []);
+        $curso->update([
+            'nombre' => $validated['nombre'],
+            'creditos' => $validated['creditos'],
+        ]);
 
-        return redirect()->route('cursos.index')->with('success', 'Curso actualizado.');
+        $curso->carreras()->sync(
+            $validated['carreras'] ?? []
+        );
+
+        $curso->prerrequisitos()->sync(
+            $validated['prerrequisitos'] ?? []
+        );
+
+        return redirect()
+            ->route('cursos.index')
+            ->with('success', 'Curso actualizado correctamente.');
     }
 
     public function destroy(Curso $curso)
     {
-        $curso->prerrequisitos()->detach();
         $curso->delete();
-        return redirect()->route('cursos.index')->with('success', 'Curso eliminado.');
+
+        return redirect()
+            ->route('cursos.index')
+            ->with('success', 'Curso eliminado correctamente.');
     }
 }

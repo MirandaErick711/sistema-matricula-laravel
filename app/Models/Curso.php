@@ -13,15 +13,17 @@ class Curso extends Model
         'creditos',
     ];
 
-    public function carreras(): BelongsToMany
+    public function carreras()
     {
         return $this->belongsToMany(
             Carrera::class,
-            'carrera_curso'
+            'carrera_curso',
+            'curso_id',
+            'carrera_id'
         );
     }
 
-    public function grupos(): HasMany
+    public function grupos()
     {
         return $this->hasMany(Grupo::class);
     }

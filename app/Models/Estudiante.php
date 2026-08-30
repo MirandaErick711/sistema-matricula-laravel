@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Estudiante extends Model
 {
@@ -15,12 +13,12 @@ class Estudiante extends Model
         'carrera_id',
     ];
 
-    public function carrera(): BelongsTo
+    public function carrera()
     {
         return $this->belongsTo(Carrera::class);
     }
 
-    public function matriculas(): HasMany
+    public function matriculas()
     {
         return $this->hasMany(Matricula::class);
     }

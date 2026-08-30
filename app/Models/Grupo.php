@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Grupo extends Model
 {
@@ -14,14 +12,16 @@ class Grupo extends Model
         'docente_id',
         'aula_id',
         'nombre',
+        'tipo',
+        'capacidad',
     ];
 
-    public function curso(): BelongsTo
+    public function curso()
     {
         return $this->belongsTo(Curso::class);
     }
 
-    public function semestre(): BelongsTo
+    public function semestre()
     {
         return $this->belongsTo(
             SemestreAcademico::class,
@@ -29,23 +29,25 @@ class Grupo extends Model
         );
     }
 
-    public function docente(): BelongsTo
+    public function docente()
     {
         return $this->belongsTo(Docente::class);
     }
 
-    public function aula(): BelongsTo
+    public function aula()
     {
         return $this->belongsTo(Aula::class);
     }
 
-    public function horarios(): HasMany
+    public function horarios()
     {
         return $this->hasMany(Horario::class);
     }
 
-    public function detallesMatricula(): HasMany
+    public function detallesMatricula()
     {
-        return $this->hasMany(DetalleMatricula::class);
+        return $this->hasMany(
+            DetalleMatricula::class
+        );
     }
 }

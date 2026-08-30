@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Horario extends Model
 {
@@ -14,7 +13,7 @@ class Horario extends Model
         'hora_fin',
     ];
 
-    public function grupo(): BelongsTo
+    public function grupo()
     {
         return $this->belongsTo(Grupo::class);
     }

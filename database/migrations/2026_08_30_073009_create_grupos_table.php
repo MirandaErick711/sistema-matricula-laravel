@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('grupos', function (Blueprint $table) {
@@ -36,19 +33,28 @@ return new class extends Migration
 
             $table->string('nombre', 10);
 
-            $table->timestamps();
+            $table->enum('tipo', [
+                'Teoria',
+                'Practica'
+            ]);
 
+            $table->unsignedInteger('capacidad');
+
+            /*
+             * No permite tener dos grupos con el mismo
+             * nombre, curso, semestre y tipo.
+             */
             $table->unique([
                 'curso_id',
                 'semestre_id',
-                'nombre'
+                'nombre',
+                'tipo'
             ]);
+
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('grupos');

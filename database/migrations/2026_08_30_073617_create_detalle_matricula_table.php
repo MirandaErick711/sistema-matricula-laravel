@@ -21,7 +21,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->unique(['matricula_id', 'grupo_id']);
+            $table->decimal('nota', 4, 2)
+                ->nullable();
+
+            $table->unique([
+                'matricula_id',
+                'grupo_id'
+            ]);
 
             $table->timestamps();
         });

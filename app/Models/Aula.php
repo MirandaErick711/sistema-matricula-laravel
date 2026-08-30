@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Aula extends Model
 {
@@ -12,7 +11,7 @@ class Aula extends Model
         'capacidad',
     ];
 
-    public function grupos(): HasMany
+    public function grupos()
     {
         return $this->hasMany(Grupo::class);
     }

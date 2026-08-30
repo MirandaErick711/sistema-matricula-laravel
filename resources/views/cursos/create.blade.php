@@ -1,44 +1,134 @@
-<h1>Nuevo curso</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Curso</title>
+</head>
+<body>
 
-<form action="{{ route('cursos.store') }}" method="POST">
-    @csrf
-    <label>Nombre</label>
-    <input type="text" name="nombre" value="{{ old('nombre') }}"><br>
+    <h1>Nuevo Curso</h1>
 
-    <label>Créditos</label>
-    <input type="number" name="creditos" value="{{ old('creditos') }}"><br>
+    @if($errors->any())
+        <div>
+            <strong>Se encontraron los siguientes errores:</strong>
 
-    <label>Docente</label>
-    <select name="docente_id">
-        @foreach($docentes as $docente)
-            <option value="{{ $docente->id }}">{{ $docente->nombres }} {{ $docente->apellidos }}</option>
-        @endforeach
-    </select><br>
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    <label>Aula</label>
-    <select name="aula_id">
-        @foreach($aulas as $aula)
-            <option value="{{ $aula->id }}">{{ $aula->nombre }}</option>
-        @endforeach
-    </select><br>
+    <form action="{{ route('cursos.store') }}" method="POST">
 
-    <fieldset>
-        <legend>Prerrequisitos</legend>
-        @foreach($cursos as $c)
-            <label>
-                <input type="checkbox" name="prerrequisitos[]" value="{{ $c->id }}">
-                {{ $c->nombre }}
-            </label><br>
-        @endforeach
-    </fieldset>
+        @csrf
 
-    <button type="submit">Guardar</button>
-</form>
+        <div>
+            <label for="nombre">Nombre del curso:</label>
 
-@if($errors->any())
-    <ul>
-        @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-@endif
+            <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value="{{ old('nombre') }}"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label for="creditos">Créditos:</label>
+
+            <input
+                type="number"
+                id="creditos"
+                name="creditos"
+                value="{{ old('creditos') }}"
+                min="1"
+                required
+            >
+        </div>
+
+        <br>
+
+        <fieldset>
+            <legend>Carreras</legend>
+
+            @forelse($carreras as $carrera)
+
+                <div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="carreras[]"
+                            value="{{ $carrera->id }}"
+                            @checked(
+                                in_array(
+                                    $carrera->id,
+                                    old('carreras', [])
+                                )
+                            )
+                        >
+
+                        {{ $carrera->nombre }}
+                    </label>
+                </div>
+
+            @empty
+
+                <p>No hay carreras registradas.</p>
+
+            @endforelse
+
+        </fieldset>
+
+        <br>
+
+        <fieldset>
+            <legend>Prerrequisitos</legend>
+
+            @forelse($cursos as $curso)
+
+                <div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="prerrequisitos[]"
+                            value="{{ $curso->id }}"
+                            @checked(
+                                in_array(
+                                    $curso->id,
+                                    old('prerrequisitos', [])
+                                )
+                            )
+                        >
+
+                        {{ $curso->nombre }}
+                    </label>
+                </div>
+
+            @empty
+
+                <p>No hay otros cursos registrados.</p>
+
+            @endforelse
+
+        </fieldset>
+
+        <br>
+
+        <button type="submit">
+            Guardar Curso
+        </button>
+
+        <a href="{{ route('cursos.index') }}">
+            Cancelar
+        </a>
+
+    </form>
+
+</body>
+</html>

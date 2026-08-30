@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetalleMatricula extends Model
 {
@@ -14,13 +13,17 @@ class DetalleMatricula extends Model
         'grupo_id',
     ];
 
-    public function matricula(): BelongsTo
+    public function matricula()
     {
-        return $this->belongsTo(Matricula::class);
+        return $this->belongsTo(
+            Matricula::class
+        );
     }
 
-    public function grupo(): BelongsTo
+    public function grupo()
     {
-        return $this->belongsTo(Grupo::class);
+        return $this->belongsTo(
+            Grupo::class
+        );
     }
 }

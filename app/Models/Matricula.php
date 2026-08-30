@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Matricula extends Model
 {
@@ -19,12 +17,14 @@ class Matricula extends Model
         'fecha_matricula' => 'date',
     ];
 
-    public function estudiante(): BelongsTo
+    public function estudiante()
     {
-        return $this->belongsTo(Estudiante::class);
+        return $this->belongsTo(
+            Estudiante::class
+        );
     }
 
-    public function semestre(): BelongsTo
+    public function semestre()
     {
         return $this->belongsTo(
             SemestreAcademico::class,
@@ -32,8 +32,10 @@ class Matricula extends Model
         );
     }
 
-    public function detalles(): HasMany
+    public function detalles()
     {
-        return $this->hasMany(DetalleMatricula::class);
+        return $this->hasMany(
+            DetalleMatricula::class
+        );
     }
 }

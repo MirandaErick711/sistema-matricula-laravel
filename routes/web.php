@@ -1,33 +1,50 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ArticuloController;
-use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\AulaController;
+use App\Http\Controllers\SemestreAcademicoController;
+use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\CarreraCursoController;
+use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\MatriculaController;
+use App\Http\Controllers\DetalleMatriculaController;
 
 Route::inertia('/', 'welcome')->name('home');
 //comentario
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
-Route::get('/articulos', function () {
-    $articulos = array('Primero', 'Segundo','Tercero', 'Último');
-    return view('articulos',['nombre' => 'Ane Aranceta','articulos' => $articulos]);
-});
 
-Route::get('articulos/{id}', [ArticuloController::class, 'show']);
-
-Route::get('/personas', [PersonaController::class, 'create'])->name('personas.index');
-Route::get('/personas/crear', [PersonaController::class, 'create'])->name('personas.crear');
-Route::post('/personas', [PersonaController::class, 'store'])->name('personas.guardar');
-
-/*Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
-Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.crear');
-Route::post('/cursos', [CursoController::class, 'store'])->name('cursos.guardar');
-*/
 
 //EDDY: CURSOS Y PRE-REQUISITO
 
 Route::resource('cursos', CursoController::class);
+Route::resource('carreras', CarreraController::class);
+Route::resource('docentes', DocenteController::class);
+Route::resource('aulas', AulaController::class);
+Route::resource('semestres-academicos',SemestreAcademicoController::class);
+Route::resource('estudiantes', EstudianteController::class);
+require __DIR__.'/settings.php';
+Route::get('carreras/{carrera}/cursos/edit',[CarreraCursoController::class, 'edit'])->name('carreras.cursos.edit');
+Route::put('carreras/{carrera}/cursos',[CarreraCursoController::class, 'update'])->name('carreras.cursos.update');
+Route::resource('grupos', GrupoController::class);
+Route::resource('horarios', HorarioController::class);
+Route::resource('matriculas',MatriculaController::class);
+Route::get(
+    'matriculas/{matricula}/grupos/create',
+    [DetalleMatriculaController::class, 'create']
+)->name('detalle-matricula.create');
 
-require __DIR__.'/settings.php'; 
+Route::post(
+    'matriculas/{matricula}/grupos',
+    [DetalleMatriculaController::class, 'store']
+)->name('detalle-matricula.store');
+
+Route::delete(
+    'matriculas/{matricula}/grupos/{detalle}',
+    [DetalleMatriculaController::class, 'destroy']
+)->name('detalle-matricula.destroy');
