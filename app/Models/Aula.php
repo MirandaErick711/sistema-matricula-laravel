@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Aula extends Model
 {
-    protected $fillable = ['nombre', 'capacidad'];
+    protected $fillable = [
+        'nombre',
+        'capacidad',
+    ];
 
-    public function cursos()
+    public function grupos(): HasMany
     {
-        return $this->hasMany(Curso::class);
+        return $this->hasMany(Grupo::class);
     }
 }

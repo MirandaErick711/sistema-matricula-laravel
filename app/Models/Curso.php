@@ -3,27 +3,30 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Curso extends Model
 {
     protected $fillable = [
         'nombre',
         'creditos',
-        'docente_id',
-        'aula_id',
     ];
 
-    public function docente()
+    public function carreras(): BelongsToMany
     {
-        return $this->belongsTo(Docente::class);
+        return $this->belongsToMany(
+            Carrera::class,
+            'carrera_curso'
+        );
     }
 
-    public function aula()
+    public function grupos(): HasMany
     {
-        return $this->belongsTo(Aula::class);
+        return $this->hasMany(Grupo::class);
     }
 
-    public function prerrequisitos()
+    public function prerrequisitos(): BelongsToMany
     {
         return $this->belongsToMany(
             Curso::class,
@@ -33,7 +36,7 @@ class Curso extends Model
         );
     }
 
-    public function esPrerrequisitoDe()
+    public function esPrerrequisitoDe(): BelongsToMany
     {
         return $this->belongsToMany(
             Curso::class,

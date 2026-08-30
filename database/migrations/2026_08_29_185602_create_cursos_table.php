@@ -13,18 +13,9 @@ return new class extends Migration
     {
         Schema::create('cursos', function (Blueprint $table) {
             $table->id();
+
             $table->string('nombre', 150);
             $table->unsignedInteger('creditos');
-
-            $table->foreignId('docente_id')
-                ->constrained('docentes')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            $table->foreignId('aula_id')
-                ->constrained('aulas')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
 
             $table->timestamps();
         });
