@@ -8,10 +8,37 @@ use Illuminate\Http\Request;
 
 class EstudianteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $estudiantes = Estudiante::with('carrera')->paginate(10);
-        return view('estudiantes.index', compact('estudiantes'));
+        $query = Estudiante::with('carrera');
+
+        // Buscar por DNI, nombres o apellidos
+        if ($request->filled('buscar')) {
+            $buscar = $request->buscar;
+
+            $query->where(function ($q) use ($buscar) {
+                $q->where('dni', 'like', "%{$buscar}%")
+                ->orWhere('nombres', 'like', "%{$buscar}%")
+                ->orWhere('apellidos', 'like', "%{$buscar}%");
+            });
+        }
+
+        // Filtrar por carrera
+        if ($request->filled('carrera_id')) {
+            $query->where('carrera_id', $request->carrera_id);
+        }
+
+        $estudiantes = $query
+            ->orderBy('apellidos')
+            ->paginate(10)
+            ->withQueryString();
+
+        $carreras = Carrera::orderBy('nombre')->get();
+
+        return view('estudiantes.index', compact(
+            'estudiantes',
+            'carreras'
+        ));
     }
 
     public function create()
