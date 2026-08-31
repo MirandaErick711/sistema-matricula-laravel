@@ -22,13 +22,13 @@
                     <a href="{{ route('dashboard') }}" class="btn btn-outline-light px-4 py-2">
                         <i class="bi bi-speedometer2 me-1"></i> Panel Dashboard
                     </a>
-                    <a href="{{ route('estudiantes.index') }}" class="btn btn-light bg-opacity-25 text-white border-0 px-4 py-2">
-                        <i class="bi bi-people-fill me-1"></i> Estudiantes
-                    </a>
+<a href="{{ route('estudiantes.index') }}" class="btn btn-outline-light px-4 py-2">
+    <i class="bi bi-people-fill me-1"></i> Estudiantes
+</a>
                 </div>
             </div>
             <div class="col-lg-4 text-center">
-                <img src="{{ asset('images/logo-uns.png') }}" alt="Escudo UNS" class="img-fluid drop-shadow" style="max-height: 180px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
+<img src="{{ asset('images/logo-nuevo.png') }}" alt="Escudo UNS" class="img-fluid drop-shadow" style="max-height: 300px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
             </div>
         </div>
     </div>
