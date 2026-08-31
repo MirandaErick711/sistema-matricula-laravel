@@ -2,13 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Matricula extends Model
 {
+    use HasFactory;
+
+    protected $table = 'matriculas';
+
     protected $fillable = [
         'estudiante_id',
-        'semestre_id',
+        'semestre',
         'fecha_matricula',
         'estado',
     ];
@@ -17,25 +24,13 @@ class Matricula extends Model
         'fecha_matricula' => 'date',
     ];
 
-    public function estudiante()
+    public function estudiante(): BelongsTo
     {
-        return $this->belongsTo(
-            Estudiante::class
-        );
+        return $this->belongsTo(Estudiante::class);
     }
 
-    public function semestre()
+    public function detalles(): HasMany
     {
-        return $this->belongsTo(
-            SemestreAcademico::class,
-            'semestre_id'
-        );
-    }
-
-    public function detalles()
-    {
-        return $this->hasMany(
-            DetalleMatricula::class
-        );
+        return $this->hasMany(DetalleMatricula::class);
     }
 }

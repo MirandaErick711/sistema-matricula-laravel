@@ -1,121 +1,123 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $curso->nombre }}</title>
-</head>
-<body>
+@extends('layouts.app')
 
-    <h1>{{ $curso->nombre }}</h1>
+@section('title', $curso->nombre)
 
-    <p>
-        <strong>ID:</strong>
-        {{ $curso->id }}
-    </p>
-
-    <p>
-        <strong>Créditos:</strong>
-        {{ $curso->creditos }}
-    </p>
-
-    <hr>
-
-    <h2>Carreras</h2>
-
-    @forelse($curso->carreras as $carrera)
-
-        <p>
-            {{ $carrera->nombre }}
+@section('header')
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-title">
+            <i class="bi bi-book-fill text-danger"></i> {{ $curso->nombre }}
+        </h1>
+        <p class="page-subtitle">
+            Ficha técnica de la asignatura, docente asignado y programación de horarios.
         </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ route('cursos.edit', $curso) }}" class="btn btn-uns btn-sm">
+            <i class="bi bi-pencil-fill me-1"></i> Editar Curso
+        </a>
+        <a href="{{ route('cursos.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+@endsection
 
-    @empty
+@section('content')
+<div class="row g-4">
+    <!-- Información de la Asignatura -->
+    <div class="col-lg-4">
+        <div class="card-uns border-top-uns p-4">
+            <div class="text-center mb-3">
+                <span class="badge bg-primary bg-opacity-10 text-primary font-monospace fs-6 px-3 py-2 rounded-pill mb-2">
+                    {{ $curso->codigo }}
+                </span>
+                <h4 class="fw-bold text-dark mb-1">{{ $curso->nombre }}</h4>
+            </div>
 
-        <p>Este curso no está asignado a ninguna carrera.</p>
+            <hr class="my-3">
 
-    @endforelse
+            <div class="mb-3">
+                <span class="text-muted small d-block">Créditos Académicos</span>
+                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning fs-6 fw-bold mt-1">
+                    {{ $curso->creditos }} créditos
+                </span>
+            </div>
 
-    <hr>
+            <div class="mb-3">
+                <span class="text-muted small d-block">Docente Responsable</span>
+                @if($curso->docente)
+                    <div class="fw-bold text-dark mt-1">
+                        <i class="bi bi-person-badge text-danger me-1"></i> {{ $curso->docente->nombre_completo }}
+                    </div>
+                    <small class="text-muted">{{ $curso->docente->email ?? '' }}</small>
+                @else
+                    <span class="text-muted fst-italic">No asignado</span>
+                @endif
+            </div>
 
-    <h2>Prerrequisitos</h2>
+            <hr class="my-3">
 
-    @forelse($curso->prerrequisitos as $prerrequisito)
-
-        <p>
-            {{ $prerrequisito->nombre }}
-        </p>
-
-    @empty
-
-        <p>Este curso no tiene prerrequisitos.</p>
-
-    @endforelse
-
-    <hr>
-
-    <h2>Grupos disponibles</h2>
-
-    @forelse($curso->grupos as $grupo)
-
-        <div>
-
-            <h3>
-                Grupo {{ $grupo->nombre }}
-            </h3>
-
-            <p>
-                <strong>Semestre:</strong>
-                {{ $grupo->semestre->nombre }}
-            </p>
-
-            <p>
-                <strong>Docente:</strong>
-                {{ $grupo->docente->nombres }}
-                {{ $grupo->docente->apellidos }}
-            </p>
-
-            <p>
-                <strong>Aula:</strong>
-                {{ $grupo->aula->nombre }}
-            </p>
-
-            <h4>Horarios</h4>
-
-            @forelse($grupo->horarios as $horario)
-
-                <p>
-                    {{ $horario->dia }}
-                    -
-                    {{ $horario->hora_inicio }}
-                    a
-                    {{ $horario->hora_fin }}
-                </p>
-
-            @empty
-
-                <p>Sin horario asignado.</p>
-
-            @endforelse
-
+            <div class="d-grid">
+                <a href="{{ route('horarios.create') }}" class="btn btn-outline-uns btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Programar Nuevo Horario
+                </a>
+            </div>
         </div>
+    </div>
 
-        <hr>
+    <!-- Horarios Programados -->
+    <div class="col-lg-8">
+        <div class="card-uns border-top-uns">
+            <div class="card-uns-header">
+                <h5 class="card-uns-title">
+                    <i class="bi bi-clock-history text-danger"></i> Horarios Programados para este Curso
+                </h5>
+            </div>
 
-    @empty
-
-        <p>
-            No hay grupos registrados para este curso.
-        </p>
-
-    @endforelse
-
-    <br>
-    <a href="{{ route('cursos.edit', $curso) }}">
-        Editar curso
-    </a>
-    |
-    <a href="{{ route('cursos.index') }}">
-        Volver a cursos
-    </a>
-</body>
-</html>
+            <div class="table-responsive">
+                <table class="table table-uns align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">ID</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Aula / Ambiente</th>
+                            <th class="text-end" style="width: 100px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($curso->horarios as $horario)
+                            <tr>
+                                <td><span class="fw-bold text-muted">#{{ $horario->id }}</span></td>
+                                <td>
+                                    <span class="badge bg-primary px-2 py-1 fw-bold">{{ $horario->dia }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-monospace fw-semibold">{{ substr($horario->hora_inicio, 0, 5) }} - {{ substr($horario->hora_fin, 0, 5) }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ $horario->aula->nombre ?? 'N/A' }}</div>
+                                    <small class="text-muted">Aforo: {{ $horario->aula->capacidad ?? '-' }} est.</small>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ route('horarios.show', $horario) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-clock fs-1 d-block mb-3 opacity-50"></i>
+                                    <p class="fs-6 mb-2">No hay horarios programados para este curso.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

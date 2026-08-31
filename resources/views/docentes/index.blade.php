@@ -1,104 +1,99 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docentes</title>
-</head>
-<body>
+@extends('layouts.app')
 
-    <h1>Docentes</h1>
+@section('title', 'Plana Docente')
 
-    @if(session('success'))
-        <p>
-            {{ session('success') }}
+@section('header')
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-title">
+            <i class="bi bi-person-badge-fill text-danger"></i> Cuerpo Docente Universitario
+        </h1>
+        <p class="page-subtitle">
+            Administración de profesores, asignaturas dictadas y contacto académico.
         </p>
-    @endif
+    </div>
+    <div>
+        <a href="{{ route('docentes.create') }}" class="btn btn-uns">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Docente
+        </a>
+    </div>
+</div>
+@endsection
 
-    <a href="{{ route('docentes.create') }}">
-        Nuevo docente
-    </a>
+@section('content')
+<div class="card-uns border-top-uns">
+    <div class="card-uns-header">
+        <h5 class="card-uns-title">
+            <i class="bi bi-people text-danger"></i> Listado de Docentes
+        </h5>
+        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+            Total: {{ $docentes->total() }} docentes
+        </span>
+    </div>
 
-    <br><br>
-
-    @if($docentes->count())
-
-        <table border="1" cellpadding="8">
-
+    <div class="table-responsive">
+        <table class="table table-uns align-middle">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>Acciones</th>
+                    <th style="width: 80px;">ID</th>
+                    <th>Apellidos y Nombres</th>
+                    <th>Correo Institucional</th>
+                    <th style="width: 140px;">Cursos a Cargo</th>
+                    <th class="text-end" style="width: 180px;">Acciones</th>
                 </tr>
             </thead>
-
             <tbody>
-
-                @foreach($docentes as $docente)
-
+                @forelse($docentes as $docente)
                     <tr>
+                        <td><span class="fw-bold text-muted">#{{ $docente->id }}</span></td>
                         <td>
-                            {{ $docente->id }}
+                            <div class="fw-bold text-dark fs-6">{{ $docente->nombre_completo }}</div>
                         </td>
-
                         <td>
-                            {{ $docente->nombres }}
+                            <span class="text-muted"><i class="bi bi-envelope me-1"></i>{{ $docente->email ?? 'N/A' }}</span>
                         </td>
-
                         <td>
-                            {{ $docente->apellidos }}
+                            <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold">
+                                <i class="bi bi-book me-1"></i> {{ $docente->cursos_count }} asignaturas
+                            </span>
                         </td>
-
-                        <td>
-
-                            <a href="{{ route('docentes.show', $docente) }}">
-                                Ver
-                            </a>
-
-                            |
-
-                            <a href="{{ route('docentes.edit', $docente) }}">
-                                Editar
-                            </a>
-
-                            |
-
-                            <form
-                                action="{{ route('docentes.destroy', $docente) }}"
-                                method="POST"
-                                style="display:inline"
-                            >
-                                @csrf
-                                @method('DELETE')
-
-                                <button
-                                    type="submit"
-                                    onclick="return confirm('¿Eliminar este docente?')"
-                                >
-                                    Eliminar
-                                </button>
-                            </form>
-
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ route('docentes.show', $docente) }}" class="btn btn-outline-secondary" title="Ver detalle">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{{ route('docentes.edit', $docente) }}" class="btn btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <form action="{{ route('docentes.destroy', $docente) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar al docente {{ $docente->nombre_completo }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
-
-                @endforeach
-
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-badge fs-1 d-block mb-3 opacity-50"></i>
+                            <p class="fs-6 mb-2">No hay docentes registrados.</p>
+                            <a href="{{ route('docentes.create') }}" class="btn btn-sm btn-uns">
+                                <i class="bi bi-plus-circle me-1"></i> Registrar Primer Docente
+                            </a>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
-
         </table>
+    </div>
 
-        <br>
-
-        {{ $docentes->links() }}
-
-    @else
-
-        <p>No hay docentes registrados.</p>
-
+    @if($docentes->hasPages())
+        <div class="p-3 border-top d-flex justify-content-center">
+            {{ $docentes->links('pagination::bootstrap-5') }}
+        </div>
     @endif
-
-</body>
-</html>
+</div>
+@endsection
