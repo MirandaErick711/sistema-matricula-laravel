@@ -14,13 +14,13 @@
         </p>
     </div>
 
-```
+
 <div>
     <a href="{{ route('estudiantes.create') }}" class="btn btn-uns">
         <i class="bi bi-plus-circle me-1"></i> Registrar Estudiante
     </a>
 </div>
-```
+
 
 </div>
 @endsection
@@ -29,7 +29,7 @@
 
 <div class="card-uns border-top-uns">
 
-```
+
 {{-- Encabezado --}}
 <div class="card-uns-header">
     <h5 class="card-uns-title">
@@ -303,7 +303,6 @@
     </div>
 
 @endif
-```
 
 </div>
 
