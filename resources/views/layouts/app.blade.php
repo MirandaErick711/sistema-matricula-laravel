@@ -510,7 +510,7 @@
                     <span class="mx-2 opacity-50">•</span>
                     <a href="https://www.uns.edu.pe" target="_blank" rel="noopener">Portal Web Institucional</a>
                     <span class="mx-2 opacity-50">•</span>
-                    <a href="{{ route('dashboard') }}">Inicio</a>
+                    <a href="{{ url('/') }}">Inicio</a>
                 </div>
             </div>
         </div>
