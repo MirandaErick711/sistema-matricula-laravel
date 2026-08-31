@@ -9,8 +9,7 @@ class DocenteController extends Controller
 {
     public function index()
     {
-        $docentes = Docente::latest()->paginate(10);
-
+        $docentes = Docente::withCount('cursos')->paginate(10);
         return view('docentes.index', compact('docentes'));
     }
 
@@ -24,19 +23,18 @@ class DocenteController extends Controller
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
+            'email' => 'nullable|email|max:100',
         ]);
 
         Docente::create($validated);
 
-        return redirect()
-            ->route('docentes.index')
+        return redirect()->route('docentes.index')
             ->with('success', 'Docente registrado correctamente.');
     }
 
     public function show(Docente $docente)
     {
-        $docente->load('grupos');
-
+        $docente->load('cursos.horarios.aula');
         return view('docentes.show', compact('docente'));
     }
 
@@ -50,21 +48,24 @@ class DocenteController extends Controller
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
+            'email' => 'nullable|email|max:100',
         ]);
 
         $docente->update($validated);
 
-        return redirect()
-            ->route('docentes.index')
+        return redirect()->route('docentes.index')
             ->with('success', 'Docente actualizado correctamente.');
     }
 
     public function destroy(Docente $docente)
     {
+        if ($docente->cursos()->exists()) {
+            return back()->with('error', 'No se puede eliminar el docente porque tiene cursos asignados.');
+        }
+
         $docente->delete();
 
-        return redirect()
-            ->route('docentes.index')
+        return redirect()->route('docentes.index')
             ->with('success', 'Docente eliminado correctamente.');
     }
 }

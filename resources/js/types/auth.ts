@@ -1,7 +1,10 @@
+export type UserRole = 'admin' | 'docente' | 'estudiante';
+
 export type User = {
     id: number;
     name: string;
     email: string;
+    rol?: UserRole;
     avatar?: string;
     email_verified_at: string | null;
     /* @chisel-2fa */

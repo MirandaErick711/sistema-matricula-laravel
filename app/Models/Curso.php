@@ -2,49 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Curso extends Model
 {
+    use HasFactory;
+
+    protected $table = 'cursos';
+
     protected $fillable = [
+        'codigo',
         'nombre',
         'creditos',
+        'docente_id',
     ];
 
-    public function carreras()
+    public function docente(): BelongsTo
     {
-        return $this->belongsToMany(
-            Carrera::class,
-            'carrera_curso',
-            'curso_id',
-            'carrera_id'
-        );
+        return $this->belongsTo(Docente::class);
     }
 
-    public function grupos()
+    public function horarios(): HasMany
     {
-        return $this->hasMany(Grupo::class);
-    }
-
-    public function prerrequisitos(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Curso::class,
-            'prerrequisitos',
-            'curso_id',
-            'prerrequisito_id'
-        );
-    }
-
-    public function esPrerrequisitoDe(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Curso::class,
-            'prerrequisitos',
-            'prerrequisito_id',
-            'curso_id'
-        );
+        return $this->hasMany(Horario::class);
     }
 }

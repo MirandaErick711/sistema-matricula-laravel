@@ -2,26 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Carrera extends Model
 {
+    use HasFactory;
+
+    protected $table = 'carreras';
+
     protected $fillable = [
         'nombre',
     ];
 
-    public function estudiantes()
+    public function estudiantes(): HasMany
     {
         return $this->hasMany(Estudiante::class);
-    }
-
-    public function cursos()
-    {
-        return $this->belongsToMany(
-            Curso::class,
-            'carrera_curso',
-            'carrera_id',
-            'curso_id'
-        );
     }
 }

@@ -9,8 +9,7 @@ class AulaController extends Controller
 {
     public function index()
     {
-        $aulas = Aula::latest()->paginate(10);
-
+        $aulas = Aula::withCount('horarios')->paginate(10);
         return view('aulas.index', compact('aulas'));
     }
 
@@ -28,15 +27,13 @@ class AulaController extends Controller
 
         Aula::create($validated);
 
-        return redirect()
-            ->route('aulas.index')
-            ->with('success', 'Aula registrada correctamente.');
+        return redirect()->route('aulas.index')
+            ->with('success', 'Aula creada correctamente.');
     }
 
     public function show(Aula $aula)
     {
-        $aula->load('grupos');
-
+        $aula->load('horarios.curso.docente');
         return view('aulas.show', compact('aula'));
     }
 
@@ -54,17 +51,19 @@ class AulaController extends Controller
 
         $aula->update($validated);
 
-        return redirect()
-            ->route('aulas.index')
+        return redirect()->route('aulas.index')
             ->with('success', 'Aula actualizada correctamente.');
     }
 
     public function destroy(Aula $aula)
     {
+        if ($aula->horarios()->exists()) {
+            return back()->with('error', 'No se puede eliminar el aula porque tiene horarios asignados.');
+        }
+
         $aula->delete();
 
-        return redirect()
-            ->route('aulas.index')
+        return redirect()->route('aulas.index')
             ->with('success', 'Aula eliminada correctamente.');
     }
 }
