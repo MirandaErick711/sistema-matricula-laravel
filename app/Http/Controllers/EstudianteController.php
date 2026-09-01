@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Carrera;
 use App\Models\Estudiante;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class EstudianteController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Estudiante::with('carrera');
 
@@ -41,13 +43,13 @@ class EstudianteController extends Controller
         ));
     }
 
-    public function create()
+    public function create(): View
     {
         $carreras = Carrera::orderBy('nombre')->get();
         return view('estudiantes.create', compact('carreras'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
@@ -63,19 +65,19 @@ class EstudianteController extends Controller
             ->with('success', 'Estudiante registrado correctamente.');
     }
 
-    public function show(Estudiante $estudiante)
+    public function show(Estudiante $estudiante): View
     {
         $estudiante->load(['carrera', 'matriculas.detalles.horario.curso']);
         return view('estudiantes.show', compact('estudiante'));
     }
 
-    public function edit(Estudiante $estudiante)
+    public function edit(Estudiante $estudiante): View
     {
         $carreras = Carrera::orderBy('nombre')->get();
         return view('estudiantes.edit', compact('estudiante', 'carreras'));
     }
 
-    public function update(Request $request, Estudiante $estudiante)
+    public function update(Request $request, Estudiante $estudiante): RedirectResponse
     {
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
@@ -91,7 +93,7 @@ class EstudianteController extends Controller
             ->with('success', 'Estudiante actualizado correctamente.');
     }
 
-    public function destroy(Estudiante $estudiante)
+    public function destroy(Estudiante $estudiante): RedirectResponse
     {
         if ($estudiante->matriculas()->exists()) {
             return back()->with('error', 'No se puede eliminar el estudiante porque tiene matrículas registradas.');

@@ -3,22 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Docente;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DocenteController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $docentes = Docente::withCount('cursos')->paginate(10);
         return view('docentes.index', compact('docentes'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('docentes.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
@@ -32,18 +34,18 @@ class DocenteController extends Controller
             ->with('success', 'Docente registrado correctamente.');
     }
 
-    public function show(Docente $docente)
+    public function show(Docente $docente): View
     {
         $docente->load('cursos.horarios.aula');
         return view('docentes.show', compact('docente'));
     }
 
-    public function edit(Docente $docente)
+    public function edit(Docente $docente): View
     {
         return view('docentes.edit', compact('docente'));
     }
 
-    public function update(Request $request, Docente $docente)
+    public function update(Request $request, Docente $docente): RedirectResponse
     {
         $validated = $request->validate([
             'nombres' => 'required|string|max:100',
@@ -57,7 +59,7 @@ class DocenteController extends Controller
             ->with('success', 'Docente actualizado correctamente.');
     }
 
-    public function destroy(Docente $docente)
+    public function destroy(Docente $docente): RedirectResponse
     {
         if ($docente->cursos()->exists()) {
             return back()->with('error', 'No se puede eliminar el docente porque tiene cursos asignados.');

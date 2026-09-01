@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Estudiante;
 use App\Models\Matricula;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class MatriculaController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $matriculas = Matricula::with(['estudiante.carrera'])
             ->withCount('detalles')
@@ -18,13 +20,13 @@ class MatriculaController extends Controller
         return view('matriculas.index', compact('matriculas'));
     }
 
-    public function create()
+    public function create(): View
     {
         $estudiantes = Estudiante::orderBy('apellidos')->get();
         return view('matriculas.create', compact('estudiantes'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'estudiante_id' => 'required|exists:estudiantes,id',
@@ -49,7 +51,7 @@ class MatriculaController extends Controller
             ->with('success', 'Matrícula creada exitosamente. Ahora puedes agregar las asignaturas.');
     }
 
-    public function show(Matricula $matricula)
+    public function show(Matricula $matricula): View
     {
         $matricula->load([
             'estudiante.carrera',
@@ -64,13 +66,13 @@ class MatriculaController extends Controller
         return view('matriculas.show', compact('matricula', 'totalCreditos'));
     }
 
-    public function edit(Matricula $matricula)
+    public function edit(Matricula $matricula): View
     {
         $estudiantes = Estudiante::orderBy('apellidos')->get();
         return view('matriculas.edit', compact('matricula', 'estudiantes'));
     }
 
-    public function update(Request $request, Matricula $matricula)
+    public function update(Request $request, Matricula $matricula): RedirectResponse
     {
         $validated = $request->validate([
             'estudiante_id' => 'required|exists:estudiantes,id',
@@ -96,7 +98,7 @@ class MatriculaController extends Controller
             ->with('success', 'Matrícula actualizada correctamente.');
     }
 
-    public function destroy(Matricula $matricula)
+    public function destroy(Matricula $matricula): RedirectResponse
     {
         $matricula->delete();
 

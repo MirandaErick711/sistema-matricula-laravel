@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\DetalleMatricula;
 use App\Models\Horario;
 use App\Models\Matricula;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DetalleMatriculaController extends Controller
 {
-    public function create(Matricula $matricula)
+    public function create(Matricula $matricula): View
     {
         $matricula->load(['estudiante.carrera', 'detalles.horario.curso']);
 
@@ -21,7 +23,7 @@ class DetalleMatriculaController extends Controller
         return view('detalle_matricula.create', compact('matricula', 'horarios'));
     }
 
-    public function store(Request $request, Matricula $matricula)
+    public function store(Request $request, Matricula $matricula): RedirectResponse
     {
         if ($matricula->estado !== 'Activa') {
             return back()->withErrors([
@@ -33,6 +35,7 @@ class DetalleMatriculaController extends Controller
             'horario_id' => 'required|exists:horarios,id',
         ]);
 
+        /** @var Horario $horarioNuevo */
         $horarioNuevo = Horario::with(['curso', 'aula'])->findOrFail($validated['horario_id']);
 
         // 1. Verificar si ya tiene matriculado este horario exacto
@@ -54,25 +57,25 @@ class DetalleMatriculaController extends Controller
 
         if ($mismoCurso) {
             return back()->withErrors([
-                'horario_id' => 'El estudiante ya tiene matriculada la asignatura "' . $horarioNuevo->curso->nombre . '".',
+                'horario_id' => 'El estudiante ya tiene matriculada la asignatura "' . ($horarioNuevo->curso->nombre ?? '') . '".',
             ]);
         }
 
         // 3. Verificar capacidad del aula
         $matriculadosEnHorario = DetalleMatricula::where('horario_id', $horarioNuevo->id)->count();
-        if ($matriculadosEnHorario >= $horarioNuevo->aula->capacidad) {
+        if ($horarioNuevo->aula && $matriculadosEnHorario >= $horarioNuevo->aula->capacidad) {
             return back()->withErrors([
                 'horario_id' => 'El aula asignada a este horario ha alcanzado su capacidad máxima (' . $horarioNuevo->aula->capacidad . ' alumnos).',
             ]);
         }
 
         // 4. Verificar cruces de horario con las asignaturas ya matriculadas
-        $horariosExistentes = $matricula->detalles()->with('horario')->get()->pluck('horario');
+        $horariosExistentes = $matricula->detalles()->with('horario.curso')->get()->pluck('horario');
         foreach ($horariosExistentes as $existente) {
-            if ($existente->dia === $horarioNuevo->dia) {
+            if ($existente && $existente->dia === $horarioNuevo->dia) {
                 if ($horarioNuevo->hora_inicio < $existente->hora_fin && $horarioNuevo->hora_fin > $existente->hora_inicio) {
                     return back()->withErrors([
-                        'horario_id' => 'Cruce de horario: coincide el día ' . $horarioNuevo->dia . ' con ' . $existente->curso->nombre . ' (' . substr($existente->hora_inicio, 0, 5) . ' - ' . substr($existente->hora_fin, 0, 5) . ').',
+                        'horario_id' => 'Cruce de horario: coincide el día ' . $horarioNuevo->dia . ' con ' . ($existente->curso->nombre ?? '') . ' (' . substr($existente->hora_inicio, 0, 5) . ' - ' . substr($existente->hora_fin, 0, 5) . ').',
                     ]);
                 }
             }
@@ -88,7 +91,7 @@ class DetalleMatriculaController extends Controller
             ->with('success', 'Asignatura agregada correctamente a la matrícula.');
     }
 
-    public function destroy(Matricula $matricula, DetalleMatricula $detalle)
+    public function destroy(Matricula $matricula, DetalleMatricula $detalle): RedirectResponse
     {
         if ($detalle->matricula_id !== $matricula->id) {
             abort(404);

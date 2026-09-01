@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Aula;
 use App\Models\Curso;
-use App\Models\Horario;
 use App\Models\Docente;
+use App\Models\Horario;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class HorarioController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $aulas = Aula::orderBy('nombre')->get();
-        $docentes = Docente::all(); 
+        $docentes = Docente::all();
 
         $modoCalendario = $request->filled('aula_id') || $request->filled('docente_id');
 
@@ -23,14 +25,14 @@ class HorarioController extends Controller
             if ($request->filled('aula_id')) {
                 $query->where('aula_id', $request->aula_id);
             } elseif ($request->filled('docente_id')) {
-                $query->whereHas('curso', function($q) use ($request) {
+                $query->whereHas('curso', function ($q) use ($request) {
                     $q->where('docente_id', $request->docente_id);
                 });
             }
 
-            $horarios = $query->orderByRaw("FIELD(dia, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado')")
-                              ->orderBy('hora_inicio')
-                              ->get();
+            $horarios = $query->orderByRaw("CASE dia WHEN 'Lunes' THEN 1 WHEN 'Martes' THEN 2 WHEN 'Miércoles' THEN 3 WHEN 'Jueves' THEN 4 WHEN 'Viernes' THEN 5 WHEN 'Sábado' THEN 6 ELSE 7 END")
+                ->orderBy('hora_inicio')
+                ->get();
         } else {
             $horarios = $query->paginate(10);
         }
@@ -38,7 +40,7 @@ class HorarioController extends Controller
         return view('horarios.index', compact('horarios', 'aulas', 'docentes', 'modoCalendario'));
     }
 
-    public function create()
+    public function create(): View
     {
         $cursos = Curso::orderBy('nombre')->get();
         $aulas = Aula::orderBy('nombre')->get();
@@ -47,7 +49,7 @@ class HorarioController extends Controller
         return view('horarios.create', compact('cursos', 'aulas', 'dias'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'curso_id' => 'required|exists:cursos,id',
@@ -61,7 +63,7 @@ class HorarioController extends Controller
             ->where('dia', $validated['dia'])
             ->where(function ($query) use ($validated) {
                 $query->where('hora_inicio', '<', $validated['hora_fin'])
-                      ->where('hora_fin', '>', $validated['hora_inicio']);
+                    ->where('hora_fin', '>', $validated['hora_inicio']);
             })
             ->exists();
 
@@ -77,13 +79,13 @@ class HorarioController extends Controller
             ->with('success', 'Horario programado correctamente.');
     }
 
-    public function show(Horario $horario)
+    public function show(Horario $horario): View
     {
         $horario->load(['curso.docente', 'aula', 'detallesMatricula.matricula.estudiante']);
         return view('horarios.show', compact('horario'));
     }
 
-    public function edit(Horario $horario)
+    public function edit(Horario $horario): View
     {
         $cursos = Curso::orderBy('nombre')->get();
         $aulas = Aula::orderBy('nombre')->get();
@@ -92,7 +94,7 @@ class HorarioController extends Controller
         return view('horarios.edit', compact('horario', 'cursos', 'aulas', 'dias'));
     }
 
-    public function update(Request $request, Horario $horario)
+    public function update(Request $request, Horario $horario): RedirectResponse
     {
         $validated = $request->validate([
             'curso_id' => 'required|exists:cursos,id',
@@ -108,7 +110,7 @@ class HorarioController extends Controller
             ->where('id', '!=', $horario->id)
             ->where(function ($query) use ($validated) {
                 $query->where('hora_inicio', '<', $validated['hora_fin'])
-                      ->where('hora_fin', '>', $validated['hora_inicio']);
+                    ->where('hora_fin', '>', $validated['hora_inicio']);
             })
             ->exists();
 
@@ -124,7 +126,7 @@ class HorarioController extends Controller
             ->with('success', 'Horario actualizado correctamente.');
     }
 
-    public function destroy(Horario $horario)
+    public function destroy(Horario $horario): RedirectResponse
     {
         if ($horario->detallesMatricula()->exists()) {
             return back()->with('error', 'No se puede eliminar el horario porque tiene estudiantes matriculados.');

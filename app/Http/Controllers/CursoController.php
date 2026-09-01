@@ -4,23 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso;
 use App\Models\Docente;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class CursoController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $cursos = Curso::with(['docente'])->withCount('horarios')->paginate(10);
         return view('cursos.index', compact('cursos'));
     }
 
-    public function create()
+    public function create(): View
     {
         $docentes = Docente::orderBy('apellidos')->get();
         return view('cursos.create', compact('docentes'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'codigo' => 'required|string|max:20|unique:cursos,codigo',
@@ -35,19 +37,19 @@ class CursoController extends Controller
             ->with('success', 'Curso registrado correctamente.');
     }
 
-    public function show(Curso $curso)
+    public function show(Curso $curso): View
     {
         $curso->load(['docente', 'horarios.aula']);
         return view('cursos.show', compact('curso'));
     }
 
-    public function edit(Curso $curso)
+    public function edit(Curso $curso): View
     {
         $docentes = Docente::orderBy('apellidos')->get();
         return view('cursos.edit', compact('curso', 'docentes'));
     }
 
-    public function update(Request $request, Curso $curso)
+    public function update(Request $request, Curso $curso): RedirectResponse
     {
         $validated = $request->validate([
             'codigo' => 'required|string|max:20|unique:cursos,codigo,' . $curso->id,
@@ -62,7 +64,7 @@ class CursoController extends Controller
             ->with('success', 'Curso actualizado correctamente.');
     }
 
-    public function destroy(Curso $curso)
+    public function destroy(Curso $curso): RedirectResponse
     {
         if ($curso->horarios()->exists()) {
             return back()->with('error', 'No se puede eliminar el curso porque tiene horarios asignados.');

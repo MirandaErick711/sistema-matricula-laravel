@@ -3,22 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aula;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AulaController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $aulas = Aula::withCount('horarios')->paginate(10);
         return view('aulas.index', compact('aulas'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('aulas.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:50',
@@ -31,18 +33,18 @@ class AulaController extends Controller
             ->with('success', 'Aula creada correctamente.');
     }
 
-    public function show(Aula $aula)
+    public function show(Aula $aula): View
     {
         $aula->load('horarios.curso.docente');
         return view('aulas.show', compact('aula'));
     }
 
-    public function edit(Aula $aula)
+    public function edit(Aula $aula): View
     {
         return view('aulas.edit', compact('aula'));
     }
 
-    public function update(Request $request, Aula $aula)
+    public function update(Request $request, Aula $aula): RedirectResponse
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:50',
@@ -55,7 +57,7 @@ class AulaController extends Controller
             ->with('success', 'Aula actualizada correctamente.');
     }
 
-    public function destroy(Aula $aula)
+    public function destroy(Aula $aula): RedirectResponse
     {
         if ($aula->horarios()->exists()) {
             return back()->with('error', 'No se puede eliminar el aula porque tiene horarios asignados.');
