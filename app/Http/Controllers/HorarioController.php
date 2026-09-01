@@ -49,7 +49,7 @@ class HorarioController extends Controller
         return view('horarios.create', compact('cursos', 'aulas', 'dias'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'curso_id' => 'required|exists:cursos,id',
@@ -59,25 +59,49 @@ class HorarioController extends Controller
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
         ]);
 
+        // 1. Validar cruce de AULA
         $cruceAula = Horario::where('aula_id', $validated['aula_id'])
             ->where('dia', $validated['dia'])
             ->where(function ($query) use ($validated) {
                 $query->where('hora_inicio', '<', $validated['hora_fin'])
-                    ->where('hora_fin', '>', $validated['hora_inicio']);
-            })
+                      ->where('hora_fin', '>', $validated['hora_inicio']);
+                })
             ->exists();
 
         if ($cruceAula) {
             return back()->withInput()->withErrors([
-                'aula_id' => 'El aula seleccionada ya está ocupada en ese día y rango horario.',
+                    'aula_id' => 'El aula seleccionada ya está ocupada en ese día y rango horario.',
             ]);
         }
 
-        Horario::create($validated);
+        // 2. Validar cruce de DOCENTE
+        // Primero, obtenemos quién es el docente del curso que intentan registrar
+        $cursoSeleccionado = Curso::findOrFail($validated['curso_id']);
 
-        return redirect()->route('horarios.index')
-            ->with('success', 'Horario programado correctamente.');
+        $cruceDocente = Horario::whereHas('curso', function ($query) use ($cursoSeleccionado) {
+                $query->where('docente_id', $cursoSeleccionado->docente_id);
+            })
+            ->where('dia', $validated['dia'])
+            ->where(function ($query) use ($validated) {
+                $query->where('hora_inicio', '<', $validated['hora_fin'])
+                      ->where('hora_fin', '>', $validated['hora_inicio']);
+            })
+            ->exists();
+
+        if ($cruceDocente) {
+            return back()->withInput()->withErrors([
+                'curso_id' => 'El docente de este curso ya tiene otra clase asignada en ese día y horario.',
+        ]);
+        }
+
     }
+
+    // Si pasa ambas validaciones, se guarda
+    Horario::create($validated);
+
+    return redirect()->route('horarios.index')
+        ->with('success', 'Horario programado correctamente.');
+}
 
     public function show(Horario $horario): View
     {
@@ -104,7 +128,7 @@ class HorarioController extends Controller
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
         ]);
 
-        // Validar cruce de aula excluyendo el actual
+        // 1. Validar cruce de AULA excluyendo el actual
         $cruceAula = Horario::where('aula_id', $validated['aula_id'])
             ->where('dia', $validated['dia'])
             ->where('id', '!=', $horario->id)
@@ -120,6 +144,27 @@ class HorarioController extends Controller
             ]);
         }
 
+        // 2. Validar cruce de DOCENTE excluyendo el actual
+        $cursoSeleccionado = Curso::findOrFail($validated['curso_id']);
+        
+        $cruceDocente = Horario::whereHas('curso', function ($query) use ($cursoSeleccionado) {
+                $query->where('docente_id', $cursoSeleccionado->docente_id);
+            })
+            ->where('dia', $validated['dia'])
+            ->where('id', '!=', $horario->id)
+            ->where(function ($query) use ($validated) {
+                $query->where('hora_inicio', '<', $validated['hora_fin'])
+                      ->where('hora_fin', '>', $validated['hora_inicio']);
+            })
+            ->exists();
+
+        if ($cruceDocente) {
+            return back()->withInput()->withErrors([
+                'curso_id' => 'El docente asignado a este curso ya tiene otra clase programada en ese día y rango horario.',
+            ]);
+        }
+
+        // 3. Si todo está libre, procedemos a actualizar
         $horario->update($validated);
 
         return redirect()->route('horarios.index')
