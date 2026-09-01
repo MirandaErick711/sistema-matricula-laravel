@@ -21,7 +21,107 @@
 @endsection
 
 @section('content')
-<div class="card-uns border-top-uns">
+
+<!-- SECCIÓN 1: PANEL DE FILTROS -->
+<div class="card-uns border-top-uns mb-4">
+    <div class="card-body">
+        <form action="{{ route('horarios.index') }}" method="GET">
+            <h6 class="mb-3 text-danger fw-bold"><i class="bi bi-funnel"></i> Consultar Calendario Específico</h6>
+            <div class="row align-items-end">
+                
+                <!-- Botones Radio -->
+                <div class="col-md-3">
+                    <div class="form-check form-check-inline mb-2">
+                        <input class="form-check-input" type="radio" name="tipo_filtro" id="filtro_aula" value="aula" checked onchange="toggleFiltros()">
+                        <label class="form-check-label" for="filtro_aula">Por Aula</label>
+                    </div>
+                    <div class="form-check form-check-inline mb-2">
+                        <input class="form-check-input" type="radio" name="tipo_filtro" id="filtro_docente" value="docente" onchange="toggleFiltros()">
+                        <label class="form-check-label" for="filtro_docente">Por Docente</label>
+                    </div>
+                </div>
+
+                <!-- Select de Aulas -->
+                <div class="col-md-4" id="div_aula">
+                    <select name="aula_id" class="form-select">
+                        <option value="">-- Seleccionar Aula --</option>
+                        @foreach($aulas as $aula)
+                            <option value="{{ $aula->id }}" {{ request('aula_id') == $aula->id ? 'selected' : '' }}>{{ $aula->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Select de Docentes (Oculto por defecto) -->
+                <div class="col-md-4" id="div_docente" style="display: none;">
+                    <select name="docente_id" class="form-select">
+                        <option value="">-- Seleccionar Docente --</option>
+                        @foreach($docentes as $docente)
+                            <option value="{{ $docente->id }}" {{ request('docente_id') == $docente->id ? 'selected' : '' }}>{{ $docente->nombre_completo ?? 'Docente #'.$docente->id }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="col-md-3 mt-3 mt-md-0 d-flex gap-2">
+                    <button type="submit" class="btn btn-uns flex-grow-1">
+                        <i class="bi bi-calendar-check"></i> Generar Calendario
+                    </button>
+                    @if($modoCalendario)
+                        <a href="{{ route('horarios.index') }}" class="btn btn-outline-secondary" title="Limpiar Filtros y volver a la tabla general">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SECCIÓN 2: RENDERIZADO CONDICIONAL (CALENDARIO VS TABLA) -->
+@if($modoCalendario)
+    <!-- VISTA DE CALENDARIO SEMANAL -->
+    <div class="row g-3">
+        @foreach(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'] as $dia)
+            <div class="col-md-4 col-lg-2">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-danger text-white text-center py-2 fw-bold">
+                        {{ $dia }}
+                    </div>
+                    <div class="card-body p-2 bg-light">
+                        @php
+                            $horariosDia = $horarios->where('dia', $dia);
+                        @endphp
+                        
+                        @forelse($horariosDia as $hor)
+                            <div class="card mb-2 border-0 border-start border-4 border-danger shadow-sm">
+                                <div class="card-body p-2">
+                                    <small class="fw-bold d-block text-danger mb-1">
+                                        <i class="bi bi-clock"></i> {{ substr($hor->hora_inicio, 0, 5) }} - {{ substr($hor->hora_fin, 0, 5) }}
+                                    </small>
+                                    <span class="fw-bold d-block lh-sm" style="font-size: 0.85rem;">{{ $hor->curso->nombre ?? 'N/A' }}</span>
+                                    <small class="d-block text-secondary mt-1" style="font-size: 0.75rem;">
+                                        @if(request()->filled('aula_id'))
+                                            <i class="bi bi-person-fill"></i> {{ $hor->curso->docente->nombre_completo ?? 'Sin asignar' }}
+                                        @else
+                                            <i class="bi bi-door-closed-fill"></i> {{ $hor->aula->nombre ?? 'Sin asignar' }}
+                                        @endif
+                                    </small>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center p-3 text-muted border border-dashed rounded mt-2">
+                                <small>Libre</small>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+@else
+    <!-- VISTA DE TABLA GENERAL PAGINADA -->
+    <div class="card-uns border-top-uns">
     <div class="card-uns-header">
         <h5 class="card-uns-title">
             <i class="bi bi-calendar-week text-danger"></i> Horarios Registrados
@@ -120,4 +220,34 @@
         </div>
     @endif
 </div>
+@endif
+
+<!-- SCRIPT PARA EL CAMBIO DE BOTONES RADIO -->
+<script>
+    function toggleFiltros() {
+        const esAula = document.getElementById('filtro_aula').checked;
+        const divAula = document.getElementById('div_aula');
+        const divDocente = document.getElementById('div_docente');
+        const selectAula = divAula.querySelector('select');
+        const selectDocente = divDocente.querySelector('select');
+
+        if (esAula) {
+            divAula.style.display = 'block';
+            divDocente.style.display = 'none';
+            selectDocente.value = ''; // Limpiar la otra selección
+        } else {
+            divAula.style.display = 'none';
+            divDocente.style.display = 'block';
+            selectAula.value = ''; // Limpiar la otra selección
+        }
+    }
+
+    // Al recargar la página, mantener la pestaña correcta abierta si se filtró por docente
+    document.addEventListener("DOMContentLoaded", function() {
+        if ("{{ request()->filled('docente_id') }}") {
+            document.getElementById('filtro_docente').checked = true;
+            toggleFiltros();
+        }
+    });
+</script>
 @endsection

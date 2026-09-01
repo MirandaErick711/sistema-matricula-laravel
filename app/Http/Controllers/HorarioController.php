@@ -5,14 +5,37 @@ namespace App\Http\Controllers;
 use App\Models\Aula;
 use App\Models\Curso;
 use App\Models\Horario;
+use App\Models\Docente;
 use Illuminate\Http\Request;
 
 class HorarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $horarios = Horario::with(['curso.docente', 'aula'])->paginate(10);
-        return view('horarios.index', compact('horarios'));
+        $aulas = Aula::orderBy('nombre')->get();
+        $docentes = Docente::all(); 
+
+        $modoCalendario = $request->filled('aula_id') || $request->filled('docente_id');
+
+        $query = Horario::with(['curso.docente', 'aula']);
+
+        if ($modoCalendario) {
+            if ($request->filled('aula_id')) {
+                $query->where('aula_id', $request->aula_id);
+            } elseif ($request->filled('docente_id')) {
+                $query->whereHas('curso', function($q) use ($request) {
+                    $q->where('docente_id', $request->docente_id);
+                });
+            }
+
+            $horarios = $query->orderByRaw("FIELD(dia, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado')")
+                              ->orderBy('hora_inicio')
+                              ->get();
+        } else {
+            $horarios = $query->paginate(10);
+        }
+
+        return view('horarios.index', compact('horarios', 'aulas', 'docentes', 'modoCalendario'));
     }
 
     public function create()
@@ -34,7 +57,6 @@ class HorarioController extends Controller
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
         ]);
 
-        // Validar cruce de aula en el mismo día y rango horario
         $cruceAula = Horario::where('aula_id', $validated['aula_id'])
             ->where('dia', $validated['dia'])
             ->where(function ($query) use ($validated) {
