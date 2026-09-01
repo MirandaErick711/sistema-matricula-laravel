@@ -49,7 +49,7 @@ class HorarioController extends Controller
         return view('horarios.create', compact('cursos', 'aulas', 'dias'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'curso_id' => 'required|exists:cursos,id',
@@ -91,17 +91,15 @@ class HorarioController extends Controller
         if ($cruceDocente) {
             return back()->withInput()->withErrors([
                 'curso_id' => 'El docente de este curso ya tiene otra clase asignada en ese día y horario.',
-        ]);
+            ]);
         }
 
+        // Si pasa ambas validaciones, se guarda
+        Horario::create($validated);
+
+        return redirect()->route('horarios.index')
+            ->with('success', 'Horario programado correctamente.');
     }
-
-    // Si pasa ambas validaciones, se guarda
-    Horario::create($validated);
-
-    return redirect()->route('horarios.index')
-        ->with('success', 'Horario programado correctamente.');
-}
 
     public function show(Horario $horario): View
     {
