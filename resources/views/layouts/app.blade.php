@@ -347,7 +347,48 @@
         .uns-footer a:hover {
             text-decoration: underline;
         }
+    /* Mensajes de validación */
+    .alert-danger {
+        background-color: #fef2f2 !important;
+        color: #991b1b !important;
+        border: 1px solid #fecaca !important;
+    }
+
+    .alert-danger strong,
+    .alert-danger li {
+        color: #991b1b !important;
+    }
+
+    .alert-danger .text-danger {
+        color: #dc2626 !important;
+    }
+
+    .alert-danger .btn-close {
+        opacity: 0.7;
+    }
+
+    /* Campos con errores de validación */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .form-control.is-invalid:focus,
+    .form-select.is-invalid:focus {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15) !important;
+    }
+
+    /* Mensaje debajo del campo */
+    .invalid-feedback {
+        display: block;
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 0.35rem;
+        font-weight: 500;
+    }
     </style>
+
     @stack('styles')
 </head>
 <body>
@@ -392,42 +433,42 @@
                 <ul class="navbar-nav mx-auto my-2 my-xl-0 gap-1">
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                            Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('matriculas.*') || request()->routeIs('detalle-matricula.*') ? 'active' : '' }}" href="{{ route('matriculas.index') }}">
-                            <i class="bi bi-journal-check"></i> Matrículas
+                            Matrículas
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('estudiantes.*') ? 'active' : '' }}" href="{{ route('estudiantes.index') }}">
-                            <i class="bi bi-people-fill"></i> Estudiantes
+                            Estudiantes
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('cursos.*') ? 'active' : '' }}" href="{{ route('cursos.index') }}">
-                            <i class="bi bi-book-fill"></i> Cursos
+                            Cursos
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('horarios.*') ? 'active' : '' }}" href="{{ route('horarios.index') }}">
-                            <i class="bi bi-clock-fill"></i> Horarios
+                            Horarios
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('aulas.*') ? 'active' : '' }}" href="{{ route('aulas.index') }}">
-                            <i class="bi bi-door-open-fill"></i> Aulas
+                            Aulas
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('docentes.*') ? 'active' : '' }}" href="{{ route('docentes.index') }}">
-                            <i class="bi bi-person-badge-fill"></i> Docentes
+                            Docentes
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('carreras.*') ? 'active' : '' }}" href="{{ route('carreras.index') }}">
-                            <i class="bi bi-mortarboard-fill"></i> Carreras
+                            Carreras
                         </a>
                     </li>
                 </ul>
